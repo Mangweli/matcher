@@ -7,5 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class PropertyType extends Model
 {
+    public $incrementing = false;
+    // protected $keyType = 'string';
+    // protected $casts = [
+    //     'id' => 'string',
+    // ];
     use HasFactory;
 }

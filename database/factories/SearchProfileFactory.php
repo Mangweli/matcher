@@ -5,7 +5,7 @@ namespace Database\Factories;
 use App\Models\PropertyType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class PropertyFactory extends Factory
+class SearchProfileFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -15,8 +15,7 @@ class PropertyFactory extends Factory
     public function definition()
     {
         return [
-            'name'             => $this->faker->text(5),
-            'address'          => $this->faker->address(),
+            'name'             => $this->faker->title(2),
             'property_type_id' => PropertyType::inRandomOrder()->first()->id
         ];
     }
