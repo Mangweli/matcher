@@ -17,6 +17,7 @@ class CreatePropertiesTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('address');
+            $table->json('fields');
             $table->foreignUuid('property_type_id')->constrained();
             $table->timestamps();
         });
