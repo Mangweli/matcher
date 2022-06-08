@@ -17,7 +17,6 @@ class CreateSearchProfilesTable extends Migration
             $table->id();
             $table->string('name');
             $table->json('search_fields');
-            $table->json('return_potential');
             $table->foreignUuid('property_type_id')->constrained();
             $table->timestamps();
         });

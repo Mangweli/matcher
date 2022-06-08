@@ -33,32 +33,26 @@ class PropertyMatcherController extends Controller
 
         $searchProfile = $this->searchProfileRepository->getProfileMatches($propertyFields);
 
-        if(empty($searchProfile)) {
+        if($searchProfile->isEmpty()) {
+            $results['message'] = "No Search Profile Found";
+
             return response()->json($results, 200);
         }
 
+        $results = [];
+
         foreach ($searchProfile as $key => $value) {
-           $checkMatches = $this->getMatches(json_decode($value->search_fields),$propertyFields);
+           $checkMatches = $this->getScores(json_decode($value->search_fields),$propertyFields);
+
+           $results[$key]['searchProfileId']    = $value->id;
+           $results[$key]['score']              = $checkMatches['score'];
+           $results[$key]['strictMatchesCount'] = $checkMatches['strictMatchesCount'];
+           $results[$key]['looseMatchesCount']  = $checkMatches['looseMatchesCount'];
         }
 
-        dd(
-            $propertyFields,
-            $query->get(),
-            $searchProfile
+        $keys = array_column($results, 'score');
+        array_multisort($keys, SORT_DESC, $results);
 
-        );
-
-
-        // dd(
-        //     "Property",
-        //     $property->toArray(),
-        //     "PropertyType",
-        //     PropertyType::where('id', $property->property_type_id)->get()->toArray(),
-        //     "Property Fields",
-        //     PropertyField::where("Property_id", $property->id)->get()->toArray(),
-        //     "Search Fields",
-        //     SearchFields::limit(10)->get()->toArray()
-
-        // );
+        return response()->json($results, 200);
     }
 }
