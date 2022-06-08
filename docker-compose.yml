@@ -5,7 +5,6 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        # command: bash -c "composer install &&  php artisan key:generate && php artisan migrate && php artisan optimize && php-fpm"
         image: matcher-app
         container_name: matcher-app
         restart: unless-stopped
@@ -18,37 +17,10 @@ services:
             - ./:/var/www
             - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
         networks:
-            - app-network
+            - matcher-network
         depends_on:
             - matcher-mysql-db
 
-    matcher-queue-worker:
-        build:
-            context: .
-            dockerfile: Dockerfile
-        command: 'php artisan queue:work'
-        image: matcher-queue-worker
-        container_name: matcher-queue-worker
-        restart: unless-stopped
-        volumes:
-            - ./:/var/www
-            - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
-        depends_on:
-            - matcher-cron
-        networks:
-            - app-network
-
-    matcher-cron:
-        build:
-            context: .
-            dockerfile: cron.Dockerfile
-        container_name: matcher-cron
-        volumes:
-        - ./:/var/www
-        depends_on:
-            - matcher-app
-        networks:
-            - app-network
 
 #NGINX WEBESRVER
     matcher-nginx:
@@ -62,10 +34,8 @@ services:
         volumes:
             - ./:/var/www
             - ./nginx/conf.d/:/etc/nginx/conf.d/
-        depends_on:
-            - matcher-redis
         networks:
-            - app-network
+            - matcher-network
 
 #MYSQL SERVICE
     matcher-mysql-db:
@@ -74,7 +44,7 @@ services:
         restart: unless-stopped
         tty: true
         ports:
-            - 3306:3306
+            - 33061:3306
         environment:
             MYSQL_DATABASE: ${DB_DATABASE}
             MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
@@ -83,50 +53,31 @@ services:
         volumes:
             - dbdata:/var/lib/mysql-files
             - ./mysql/my.cnf:/etc/mysql/my.cnf
-        depends_on:
-            - matcher-nginx
         networks:
-            - app-network
+            - matcher-network
 
-#RABBIT MQ
-    matcher-rabbitmq:
-        image: rabbitmq:3-management-alpine
-        container_name: matcher-rabbitmq
+    #MYSQL SERVICE
+    matcher-mysql-db-test:
+        image: mysql:8.0.27
+        container_name: matcher-mysql-db-test
+        restart: unless-stopped
+        tty: true
+        ports:
+            - 33062:3306
         environment:
-            RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
-            RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-            RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-        ports:
-            - 5672:5672
-            - 15672:15672
-        volumes:
-            - rabbitmqdata:/var/lib/rabbitmq/
+            MYSQL_DATABASE: ${DB_DATABASE_TEST}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD_TEST}
+            SERVICE_NAME: mysql
+            SERVICE_TAG: dev
         networks:
-            - app-network
-#REDIS
-    matcher-redis:
-        image: redis:alpine
-        container_name: matcher-redis
-        #command: ['redis-server', '--bind','0.0.0.0','--requirepass', 'testes','--port','6379']
-        ports:
-            - 6379:6379
-        volumes:
-            - redisdata:/data
-        depends_on:
-            - matcher-rabbitmq
-        networks:
-            - app-network
+            - matcher-network
 
 networks:
-  app-network:
+  matcher-network:
     driver: bridge
 
 #Volumes
 volumes:
     dbdata:
-        driver: local
-    rabbitmqdata:
-        driver: local
-    redisdata:
         driver: local
 

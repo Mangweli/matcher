@@ -21,4 +21,4 @@ USER www
 
 EXPOSE 9000
 
-CMD bash -c "composer install &&  php artisan key:generate && php artisan migrate && php artisan optimize && php-fpm"
+CMD bash -c "composer install &&  php artisan key:generate && php artisan migrate && php artisan optimize:clear && php artisan config:clear && php-fpm"

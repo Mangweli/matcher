@@ -65,6 +65,7 @@ class PropertySearchProfileTest extends TestCase
     }
 
     public function test_able_to_filter_properties_based_on_property() {
+        $this->withoutExceptionHandling();
         Property::factory(120)->create();
         SearchProfile::factory(500)->create();
 
@@ -74,8 +75,7 @@ class PropertySearchProfileTest extends TestCase
         $response = $this->get('/api/match/'.$property->id);
 
         $response->assertStatus(200);
-        //dd($response);
-        $response->assertJsonStructure(['searchProfileId', 'score', 'strictMatchesCount', 'looseMatchesCount']);
+        $response->assertJsonStructure([['searchProfileId', 'score', 'strictMatchesCount', 'looseMatchesCount']]);
 
     }
 }
